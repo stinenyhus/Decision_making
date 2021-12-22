@@ -37,3 +37,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+
+# Files
+ABM_test.Rmd
+"Test networks in R".R
+
