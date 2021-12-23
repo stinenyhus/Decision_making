@@ -41,5 +41,6 @@ vignettes/*.pdf
 
 # Files
 ABM_test.Rmd
-"Test networks in R".R
+soccult_simulations.R
+
 

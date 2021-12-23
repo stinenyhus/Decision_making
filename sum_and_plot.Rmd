@@ -1,0 +1,104 @@
+---
+title: "sum_and_plot"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Run if UCloud instance is fresh
+```{r}
+install.packages("pacman")
+```
+
+### Load packages and functions
+```{r}
+library(pacman)
+p_load(tidyverse,gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork, stringr)
+setwd("/work/Exam/decision_making")
+source("post_sim_functions.R")
+```
+
+### Get folders, read data and sum
+List folder
+```{r}
+folders = list.dirs(file.path("data"))
+folders = folders[c(2,4,6,7)]
+folders
+```
+
+Sum data
+```{r}
+out = sum_multiple_results(folders)
+data_summed = out[[1]]
+degree_distribution = out[[2]]
+```
+
+### Result plots
+Baseline
+```{r}
+source("post_sim_functions.R")
+data_summed %>% subset(baseline==T) %>% 
+  subset(round < 50) %>% 
+  plot_standard_by_name(title = "Baseline simulations")
+```
+
+High status = 0.5
+```{r}
+data_summed %>% subset(status == "0.5") %>% plot_standard_by_name(title="High status = 0.5% of tau")
+```
+
+High status = 0.75
+```{r}
+data_summed %>% subset(status == "0.75") %>% plot_standard_by_name(title="High status = 0.75% of tau")
+```
+
+High status = 1
+```{r}
+data_summed %>% subset(status == "1") %>% plot_standard_by_name(title="High status = 1% of tau")
+```
+
+High degree = 24 connections
+```{r}
+data_summed %>% subset(degree == "24") %>% plot_standard_by_name(title = "High degree = 24 connections")
+```
+
+### Degree distribution plots
+```{r}
+means_baseline = degree_distribution %>% subset(baseline==T) %>% 
+  dplyr::group_by(n_neighbors) %>% 
+  dplyr::summarise(mean_n = mean(n, na.rm = T),
+                   sd_n = sd(n, na.rm = T))
+
+plot_degree_distribution(means_baseline, title ="Baseline simulations")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,104 @@
-#Plotting results 
-library(pacman)
-p_load(tidyverse,gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork)
-source("useful_function_soccult.r")
 
+
+
+
+baseline_50 <- read.csv("data/NoHigh_tau_0.33_nSeeds_50/simulation_results.csv")
+baseline_100 <- read.csv("data/NoHigh_tau_0.33_nSeeds_100/simulation_results.csv")
+baseline_150 <- read.csv("data/NoHigh_tau_0.33_nSeeds_150/simulation_results.csv")
+
+# High status, status = 0.5% of tau
+status05_50 <-read.csv("data/nHigh_50_highStatus_TRUE_HighNodeTauPerc_0.5/simulation_results.csv")
+status05_100 <-read.csv("data/nHigh_100_highStatus_TRUE_HighNodeTauPerc_0.5/simulation_results.csv")
+status05_150 <-read.csv("data/nHigh_150_highStatus_TRUE_HighNodeTauPerc_0.5/simulation_results.csv")
+
+# Summing
+base_50_sum <- sum_data(baseline_50, name= "Baseline network with 50 initial seeds")
+base_100_sum <- sum_data(baseline_100, name= "Baseline network with 100 initial seeds")
+base_150_sum <- sum_data(baseline_150, name= "Baseline network with 150 initial seeds")
+
+stat05_50_sum <- sum_data(status05_50, name = "0.5% of tau, 50 initial seed")
+stat05_100_sum <- sum_data(status05_100, name = "0.5% of tau, 100 initial seed")
+stat05_150_sum <- sum_data(status05_150, name = "0.5% of tau, 150 initial seed")
+
+# Combining dfs
+baseline <- rbind(base_50_sum, base_100_sum, base_150_sum)
+status05 <- rbind(stat05_50_sum, stat05_100_sum, stat05_150_sum)
+
+# Plotting
+plot_standard_by_name(baseline, title = "Spread of contagion for baseline networks")
+plot_standard_by_name(status05, title = "Spred of contagion for network where high status=0.5*tau")
+
+
+ggplot(base_50_sum, aes(round, sumadopt))+ # color = str_wrap(tau,20)
+  geom_line(size = 1.2)+
+  theme_minimal()+
+  theme(text = element_text(size = 15, family = "serif"), legend.key.height = unit(1,"cm"))+
+  scale_color_brewer(palette = "PuOr")+
+  labs(title = "Baseline network - 50 seeds")
+
+
+
+calculate_point_estimates <- function(data, data_summed){
+  q25=filter(data, adopters >= 22500*0.25) %>% group_by(network) %>% summarise(minround = min(round))
+  q25_mean = round(mean(q25$minround),0)
+  q25_sd   = round(sd(q25$minround),2)
+  q50=filter(data, adopters >= 22500*0.50) %>% group_by(network) %>% summarise(minround = min(round))
+  q50_mean = round(mean(q50$minround),0)
+  q50_sd   = round(sd(q50$minround),2)
+  q75=filter(data, adopters >= 22500*0.75) %>% group_by(network) %>% summarise(minround = min(round))
+  q75_mean = round(mean(q75$minround),0)
+  q75_sd   = round(sd(q75$minround),2)
+  q99=filter(data, adopters >= 22500*0.99) %>% group_by(network) %>% summarise(minround = min(round))
+  q99_mean = round(mean(q99$minround),0)
+  q99_sd   = round(sd(q99$minround),2)
+  all <- data.frame(
+    name = data_summed$name[1],
+    mean_25 = q25_mean,
+    sd_25   = q25_sd,
+    mean_50 = q50_mean,
+    sd_50   = q50_sd,
+    mean_75 = q75_mean,
+    sd_75   = q75_sd,
+    mean_99 = q99_mean,
+    sd_99   = q99_sd
+  )
+  return(all)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOCCULT #####
 #
 ####Simulation 0 - baseline####
 #Loading file 

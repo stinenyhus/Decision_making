@@ -1,0 +1,150 @@
+---
+title: "Simulations_decision_making"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Prepare packages and functions
+```{r}
+setwd("/work/Exam/decision_making")
+source("simulation.r")
+# install.packages("pacman")
+library(pacman)
+p_load(tidyverse, network, igraph, intergraph, tidygraph, ggraph, ggplot2, ggthemes)
+```
+
+The defaults of the function is 
+n = 10000 (10000 nodes)
+nei = 2 (gives a baseline neighborhood of 12)
+tau_type = "random_tau" (meaning that thresholds are normally distributed)
+tau = 0.33 (sd = 0.16 hardcoded in the function)
+rep = 100
+rounds = 100
+
+In the following, simulations using 50, 100 and 150 initially seeded nodes is used. 
+When highly influential (high status or degree) nodes are included, they are also the initial seeds. 
+
+Baseline model
+```{r}
+baseline2 <- contagion_sim(n_seeds = 2)
+baseline4 <- contagion_sim(n_seeds = 4)
+baseline8 <- contagion_sim(n_seeds = 8)
+```
+
+High status nodes - percentage = 1
+```{r}
+high_status2_perc1 <- contagion_sim(n_seeds = 2,
+                                     n_high = 2,
+                                     high_status = TRUE,
+                                     high_tau_perc = 1)
+
+high_status4_perc1 <- contagion_sim(n_seeds = 4,
+                                      n_high = 4,
+                                      high_status = TRUE,
+                                      high_tau_perc = 1)
+
+high_status8_perc1 <- contagion_sim(n_seeds = 8,
+                                      n_high = 8,
+                                      high_status = TRUE,
+                                      high_tau_perc = 1)
+print("Finished High status nodes - percentage = 1")
+```
+
+High status nodes - percentage = 0.75
+```{r}
+high_status2_perc075 <- contagion_sim(n_seeds = 2,
+                                       n_high = 2,
+                                       high_status = TRUE,
+                                       high_tau_perc = 0.75)
+
+high_status4_perc075 <- contagion_sim(n_seeds = 4,
+                                        n_high = 4,
+                                        high_status = TRUE,
+                                        high_tau_perc = 0.75)
+
+high_status8_perc075 <- contagion_sim(n_seeds = 8,
+                                        n_high = 8,
+                                        high_status = TRUE,
+                                        high_tau_perc = 0.75)
+print("Finished High status nodes - percentage = 0.75")
+```
+
+High status nodes - percentage = 0.5
+```{r}
+high_status2_perc05 <- contagion_sim(n_seeds = 2,
+                                      n_high = 2,
+                                      high_status = TRUE,
+                                      high_tau_perc = 0.5)
+
+high_status4_perc05 <- contagion_sim(n_seeds = 4,
+                                       n_high = 4,
+                                       high_status = TRUE,
+                                       high_tau_perc = 0.5)
+
+high_status8_perc05 <- contagion_sim(n_seeds = 8,
+                                       n_high = 8,
+                                       high_status = TRUE,
+                                       high_tau_perc = 0.5)
+print("Finished High status nodes - percentage = 0.5")
+```
+
+High degree nodes - degree = 24
+```{r}
+high_degree2_n_con24 <- contagion_sim(n_seeds = 2,
+                                       n_high = 2,
+                                       high_degree = TRUE,
+                                       connectedness = 24)
+
+high_degree4_n_con24 <- contagion_sim(n_seeds = 4,
+                                        n_high = 4,
+                                        high_degree = TRUE,
+                                        connectedness = 24)
+
+high_degree8_n_con24 <- contagion_sim(n_seeds = 8,
+                                        n_high = 8,
+                                        high_degree = TRUE,
+                                        connectedness = 24)
+print("Finished High degree nodes - degree = 24")
+```
+
+High degree nodes - degree = 48
+```{r}
+high_degree2_n_con48 <- contagion_sim(n_seeds = 2,
+                                       n_high = 2,
+                                       high_degree = TRUE,
+                                       connectedness = 48)
+
+high_degree4_n_con48 <- contagion_sim(n_seeds = 4,
+                                        n_high = 4,
+                                        high_degree = TRUE,
+                                        connectedness = 48)
+
+high_degree8_n_con48 <- contagion_sim(n_seeds = 8,
+                                        n_high = 8,
+                                        high_degree = TRUE,
+                                        connectedness = 48)
+print("Finished High degree nodes - degree = 48")
+```
+
+High degree nodes - degree = 96
+```{r}
+high_degree2_n_con96 <- contagion_sim(n_seeds = 2,
+                                       n_high = 2,
+                                       high_degree = TRUE,
+                                       connectedness = 96)
+
+high_degree4_n_con96 <- contagion_sim(n_seeds = 4,
+                                        n_high = 4,
+                                        high_degree = TRUE,
+                                        connectedness = 96)
+
+high_degree8_n_con96 <- contagion_sim(n_seeds = 8,
+                                        n_high = 8,
+                                        high_degree = TRUE,
+                                        connectedness = 96)
+print("Finished High degree nodes - degree = 96")
+```
+
