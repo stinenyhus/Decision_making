@@ -46,15 +46,16 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
                           connectedness = 0, # How connected high degree nodes should be
                           
                           rep = 100, # Number of repetitions - new network is generated every time
-                          rounds = 100, # n rounds of the simulation 
+                          rounds = 50, # n rounds of the simulation 
                           tau = 0.33, # Threshold (mean of gaussian distribution or just threshold for all nodes)
-                          n = 10000, # Number of nodes in the network - preferably a number with a natural square root
+                          n = 22500, # Number of nodes in the network - preferably a number with a natural square root
                           nei = 2, # degree of neighborhood connectedness
                           p = 0.1){ # probability of rewiring - keep zero for new high status node?
     
   # Ensure existence of data folder
   dir.create("data", showWarnings = F)
- 
+  degree_distribution <- data.frame()
+  
   for (i in 1:rep){
     #generate network
     network <- generate_neumann(n, p, nei)
@@ -118,8 +119,8 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
     distribution <- degree %>% 
       dplyr::group_by(n_neighbors) %>% 
       dplyr::summarise(n=n())
-
-    write.csv(distribution, file.path(folder, paste("degree_distrib_rep_", i, ".csv", sep = "")))
+    distribution$repetition <- i
+    degree_distribution <- rbind(degree_distribution, distribution)
     
     #### INITIAL ADOPTER #### 
     adopters <- rep(F, n)
@@ -224,5 +225,6 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
     
   }
   write.csv(all_adopters, file.path(folder, "simulation_results.csv"))
+  write.csv(degree_distribution, file.path(folder, "degree_distribution.csv"))
   return(all_adopters)
 }
