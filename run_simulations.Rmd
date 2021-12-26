@@ -29,19 +29,19 @@ When highly influential (high status or degree) nodes are included, they are als
 
 Baseline model
 ```{r}
-baseline2 <- contagion_sim(n_seeds = 2)
-baseline4 <- contagion_sim(n_seeds = 4)
-baseline8 <- contagion_sim(n_seeds = 8)
+# baseline2 <- contagion_sim(n_seeds = 2)
+# baseline4 <- contagion_sim(n_seeds = 4)
+# baseline8 <- contagion_sim(n_seeds = 8)
 ```
 
 High status nodes - percentage = 1
 ```{r}
-high_status2_perc1 <- contagion_sim(n_seeds = 2,
+# high_status2_perc1 <- contagion_sim(n_seeds = 2,
                                      n_high = 2,
                                      high_status = TRUE,
                                      high_tau_perc = 1)
 
-high_status4_perc1 <- contagion_sim(n_seeds = 4,
+# high_status4_perc1 <- contagion_sim(n_seeds = 4,
                                       n_high = 4,
                                       high_status = TRUE,
                                       high_tau_perc = 1)
