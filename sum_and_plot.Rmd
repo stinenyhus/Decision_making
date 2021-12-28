@@ -16,7 +16,7 @@ install.packages("pacman")
 ```{r}
 library(pacman)
 p_load(tidyverse,gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork, stringr)
-setwd("/work/Exam/decision_making")
+# setwd("/work/Exam/decision_making")
 source("post_sim_functions.R")
 ```
 
@@ -24,7 +24,7 @@ source("post_sim_functions.R")
 List folder
 ```{r}
 folders = list.dirs(file.path("data"))
-folders = folders[c(2,4,6,7)]
+folders = folders[2:length(folders)]
 folders
 ```
 
@@ -33,14 +33,13 @@ Sum data
 out = sum_multiple_results(folders)
 data_summed = out[[1]]
 degree_distribution = out[[2]]
+point_estimates = out[[3]]
 ```
 
 ### Result plots
 Baseline
 ```{r}
-source("post_sim_functions.R")
 data_summed %>% subset(baseline==T) %>% 
-  subset(round < 50) %>% 
   plot_standard_by_name(title = "Baseline simulations")
 ```
 
@@ -56,7 +55,7 @@ data_summed %>% subset(status == "0.75") %>% plot_standard_by_name(title="High s
 
 High status = 1
 ```{r}
-data_summed %>% subset(status == "1") %>% plot_standard_by_name(title="High status = 1% of tau")
+data_summed %>% subset(status == "1") %>% plot_standard_by_name(title="High status = 100% of tau")
 ```
 
 High degree = 24 connections
@@ -64,14 +63,51 @@ High degree = 24 connections
 data_summed %>% subset(degree == "24") %>% plot_standard_by_name(title = "High degree = 24 connections")
 ```
 
-### Degree distribution plots
+High degree = 48 connections
 ```{r}
-means_baseline = degree_distribution %>% subset(baseline==T) %>% 
-  dplyr::group_by(n_neighbors) %>% 
-  dplyr::summarise(mean_n = mean(n, na.rm = T),
-                   sd_n = sd(n, na.rm = T))
+data_summed %>% subset(degree == "48") %>% plot_standard_by_name(title = "High degree = 48 connections")
+```
 
-plot_degree_distribution(means_baseline, title ="Baseline simulations")
+High degree = 96 connections
+```{r}
+data_summed %>% subset(degree == "96") %>% plot_standard_by_name(title = "High degree = 96 connections")
+```
+
+
+
+
+### Degree distribution plots
+
+Getting mean degree under different conditions
+```{r}
+#Maybe we dont want this??
+means_baseline <- degree_distribution %>% subset(baseline==T) %>% mean_degree()
+
+#This is just all simulation where high degree = FALSE, so they should all have similar degree
+means_standard <- degree_distribution %>% subset(degree==F) %>% mean_degree()
+
+#The different high degree conditions - what makes sense here? In a way we need all nine combinations. Maybe just the one above actually
+means_high_degree_24 <- degree_distribution %>% subset(degree=="24") %>% mean_degree()
+means_high_degree_48 <- degree_distribution %>% subset(degree=="48") %>% mean_degree()
+means_high_degree_96 <- degree_distribution %>% subset(degree=="96") %>% mean_degree()
+```
+
+plotting baseline
+```{r}
+degree_baseline_plot <- plot_degree_distribution(means_baseline, title ="Baseline simulations")
+degree_baseline_plot
+ggsave("degree_distribution_baseline.png", degree_baseline_plot, width = 12, height = 6)
+```
+
+plotting standard, i.e., high degree = FALSE
+```{r}
+degree_standard_plot <- plot_degree_distribution(means_standard, title = "Standard degree distribution")
+degree_standard_plot
+ggsave("degree_distribution_standard.png", degree_standard_plot, width = 12, height = 6)
+```
+
+plotting high degree = TRUE
+```{r}
 
 ```
 
@@ -101,4 +137,40 @@ plot_degree_distribution(means_baseline, title ="Baseline simulations")
 
 
 
+### Point estimates
+
+```{r}
+calculate_point_estimates <- function(data){
+  # data should be summed before this function
+  q25=filter(data, sumadopt >= 22500*0.25) %>% group_by(network) %>% summarise(minround = min(round))
+  q25_mean = round(mean(q25$minround),0)
+  q25_sd   = round(sd(q25$minround),2)
+  q50=filter(data, adopters >= 22500*0.50) %>% group_by(network) %>% summarise(minround = min(round))
+  q50_mean = round(mean(q50$minround),0)
+  q50_sd   = round(sd(q50$minround),2)
+  q75=filter(data, adopters >= 22500*0.75) %>% group_by(network) %>% summarise(minround = min(round))
+  q75_mean = round(mean(q75$minround),0)
+  q75_sd   = round(sd(q75$minround),2)
+  q99=filter(data, adopters >= 22500*0.99) %>% group_by(network) %>% summarise(minround = min(round))
+  q99_mean = round(mean(q99$minround),0)
+  q99_sd   = round(sd(q99$minround),2)
+  all <- data.frame(
+    name = data$name[1],
+    mean_25 = q25_mean,
+    sd_25   = q25_sd,
+    mean_50 = q50_mean,
+    sd_50   = q50_sd,
+    mean_75 = q75_mean,
+    sd_75   = q75_sd,
+    mean_99 = q99_mean,
+    sd_99   = q99_sd
+  )
+  return(all)
+}
+```
+
+### See point estimates
+```{r}
+View(point_estimates)
+```
 

@@ -42,5 +42,10 @@ vignettes/*.pdf
 # Files
 ABM_test.Rmd
 soccult_simulations.R
+*.html # Dont push README preview
+
+# Figures and data files 
+*.png
+*.csv
 
 
