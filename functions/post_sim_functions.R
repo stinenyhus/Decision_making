@@ -24,37 +24,48 @@ mean_degree <- function(degree_distributions){
 }
 
 # For getting quantile point estimates of saturations
-calculate_point_estimates <- function(data, name){
-  q25=filter(data, adopters >= 22500*0.25) %>% group_by(network) %>% summarise(minround = min(round))
-  q25_mean = round(mean(q25$minround),0)
-  q25_sd   = round(sd(q25$minround),2)
-  q50=filter(data, adopters >= 22500*0.50) %>% group_by(network) %>% summarise(minround = min(round))
-  q50_mean = round(mean(q50$minround),0)
-  q50_sd   = round(sd(q50$minround),2)
-  q75=filter(data, adopters >= 22500*0.75) %>% group_by(network) %>% summarise(minround = min(round))
-  q75_mean = round(mean(q75$minround),0)
-  q75_sd   = round(sd(q75$minround),2)
-  q99=filter(data, adopters >= 22500*0.99) %>% group_by(network) %>% summarise(minround = min(round))
-  q99_mean = round(mean(q99$minround),0)
-  q99_sd   = round(sd(q99$minround),2)
-  # Put into dataframe
-  all <- data.frame(
-    name = name,
-    mean_25 = q25_mean,
-    sd_25   = q25_sd,
-    mean_50 = q50_mean,
-    sd_50   = q50_sd,
-    mean_75 = q75_mean,
-    sd_75   = q75_sd,
-    mean_99 = q99_mean,
-    sd_99   = q99_sd
-  )
+calculate_point_estimates <- function(data, name, saturations){
+  all <- data.frame(name=name)
+  for (point in saturations){
+    q = filter(data, adopters >= 22500*point)%>% group_by(network) %>% summarise(minround = min(round))
+    q_mean = round(mean(q$minround),0)
+    q_sd   = round(sd(q$minround),2)
+    name_mean <- paste("mean", point)
+    name_sd <- paste("sd", point)
+    assign(all$name_mean, q_mean)
+    assign(all$name_sd, q_sd)
+  }
+  # 
+  # q25=filter(data, adopters >= 22500*0.25) %>% group_by(network) %>% summarise(minround = min(round))
+  # q25_mean = round(mean(q25$minround),0)
+  # q25_sd   = round(sd(q25$minround),2)
+  # q50=filter(data, adopters >= 22500*0.50) %>% group_by(network) %>% summarise(minround = min(round))
+  # q50_mean = round(mean(q50$minround),0)
+  # q50_sd   = round(sd(q50$minround),2)
+  # q75=filter(data, adopters >= 22500*0.75) %>% group_by(network) %>% summarise(minround = min(round))
+  # q75_mean = round(mean(q75$minround),0)
+  # q75_sd   = round(sd(q75$minround),2)
+  # q99=filter(data, adopters >= 22500*0.99) %>% group_by(network) %>% summarise(minround = min(round))
+  # q99_mean = round(mean(q99$minround),0)
+  # q99_sd   = round(sd(q99$minround),2)
+  # # Put into dataframe
+  # all <- data.frame(
+  #   name = name,
+  #   mean_25 = q25_mean,
+  #   sd_25   = q25_sd,
+  #   mean_50 = q50_mean,
+  #   sd_50   = q50_sd,
+  #   mean_75 = q75_mean,
+  #   sd_75   = q75_sd,
+  #   mean_99 = q99_mean,
+  #   sd_99   = q99_sd
+  # )
   return(all)
 }
 
 # Automatically sum simulation results, takes list of folders that are all in a data folder as input
 # Outputs the summed results, the degree distributions and the point estimates of saturation
-sum_multiple_results <- function(folders){
+sum_multiple_results <- function(folders, saturations){
   all_data_sum = data.frame()
   degree_distributions <- data.frame()
   point_estimates <- data.frame()
@@ -82,7 +93,9 @@ sum_multiple_results <- function(folders){
       degree_distribution$baseline <- TRUE
       
       # Summarise point estimates
-      points <- calculate_point_estimates(results, name = paste("Baseline", split[[1]][length(split[[1]])], "seeds"))
+      points <- calculate_point_estimates(results, 
+                                          name = paste("Baseline", split[[1]][length(split[[1]])], "seeds"),
+                                          saturations = saturations)
       
     } 
     # High status files
@@ -99,7 +112,8 @@ sum_multiple_results <- function(folders){
                                                                 split[[1]][length(split[[1]])], 
                                                                 "with",
                                                                 split[[1]][3], 
-                                                                "seeds"))
+                                                                "seeds"),
+                                          saturations = saturations)
     } 
     
     # High degree files 
@@ -116,7 +130,8 @@ sum_multiple_results <- function(folders){
                                                                 split[[1]][length(split[[1]])],
                                                                 "with",
                                                                 split[[1]][3],
-                                                                "seeds"))
+                                                                "seeds"),
+                                          saturations = saturations)
     } 
     # Combine this file with previous
     all_data_sum <- rbind(all_data_sum, summed_data)
@@ -136,7 +151,7 @@ plot_standard <- function(summed_dataframe, title = "",
   plot <- ggplot(summed_dataframe, aes(round, sumadopt, color = str_wrap(tau,20)))+
     geom_line(size = 1.2)+
     theme_minimal()+
-    theme(text = element_text(size = 15, family = "serif"), legend.key.height = unit(1,"cm"))+
+    theme(text = element_text(size = 20, family = "serif"), legend.key.height = unit(1,"cm"))+
     scale_color_brewer(palette = "PuOr")+
     labs(title = title, x = x_name, y = y_name) # , color = "tau"
   return(plot)
@@ -149,7 +164,7 @@ plot_standard_by_name <- function(summed_dataframe, title = "",
   plot <- ggplot(summed_dataframe, aes(round, sumadopt, color = str_wrap(name,20)))+
     geom_line(size = 1.2)+
     theme_minimal()+
-    theme(text = element_text(size = 15, family = "serif"), legend.key.height = unit(1,"cm"))+
+    theme(text = element_text(size = 20, family = "serif"), legend.key.height = unit(1,"cm"))+
     scale_color_brewer(palette = "Dark2")+
     labs(title = title, x = x_name, y = y_name, color = "Simulation")
   return(plot)

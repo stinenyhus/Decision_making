@@ -43,6 +43,7 @@ vignettes/*.pdf
 ABM_test.Rmd
 soccult_simulations.R
 *.html # Dont push README preview
+NoHigh_tau_0.33_nSeeds_1/*
 
 # Figures and data files 
 *.png
