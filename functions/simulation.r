@@ -73,6 +73,7 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
     if (high_degree == T){
       mat_ids = create_connected_nodes(adj, n_high, connectedness)
       adj = mat_ids[1][[1]]
+      networknetwork <- asNetwork(graph_from_adjacency_matrix(adj))
       id_connected_nodes <- mat_ids[2][[1]]
       
       #Preparing folder
@@ -118,6 +119,7 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
     
     # Saving degree distribution for this iteration 
     degree = data.frame(node=rep(0,n), neighbors=rep(0,n), n_neighbors = rep(0,n))
+    
     for (j in 1:n){
       neighbors = get.neighborhood(networknetwork, j)
       degree$node[j] = j

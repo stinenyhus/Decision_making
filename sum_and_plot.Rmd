@@ -15,7 +15,7 @@ install.packages("pacman")
 ### Load packages and functions
 ```{r}
 library(pacman)
-p_load(gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork, stringr)
+p_load(gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork, stringr, tidyverse)
 # setwd("/work/Exam/decision_making")
 source("functions/post_sim_functions.R")
 ```
@@ -28,9 +28,10 @@ folders = folders[2:length(folders)] # Remove the first one that is just "data"
 folders
 ```
 
+
 Sum data
 ```{r}
-out = sum_multiple_results(folders)
+out = sum_multiple_results(folders, saturations = c(0.20,0.50,0.99))
 data_summed = out[[1]]
 degree_distribution = out[[2]]
 point_estimates = out[[3]]
@@ -39,11 +40,86 @@ point_estimates = out[[3]]
 ### Result plots
 Baseline
 ```{r}
-base_plot <- data_summed %>% subset(baseline==T) %>% 
+base_plot <- data_summed %>% 
+  subset(baseline==T) %>% 
+  subset(round<=35) %>% 
   plot_standard_by_name(title = "Baseline simulations")
 base_plot
 ggsave("fig/Baseline_saturation.png", base_plot, width = 12, height = 6)
 ```
+
+
+```{r}
+palette <- brewer.pal(8,"Dark2")
+```
+
+
+```{r}
+high_status_plot <- data_summed %>% 
+  subset(status!=F) %>% 
+  subset(round<=35) %>% 
+    ggplot(aes(round, 
+               sumadopt, 
+               color = interaction(str_wrap(name,20), status, sep=", status="),
+               linetype = interaction(str_wrap(name,20), status, sep = ", status=")))+
+        geom_line(size = 0.7)+
+        theme_minimal()+
+        theme(text = element_text(size = 20, family = "serif"), 
+              legend.key.height = unit(1,"cm"),
+              legend.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_brewer(palette = "Dark2")+
+  scale_color_manual(name="",
+                     values=c(palette[4], palette[5], palette[6], 
+                              palette[4], palette[5], palette[6],
+                              palette[4], palette[5], palette[6]),
+                     guide = guide_legend(nrow=3,ncol=3))+
+  scale_linetype_manual(name="",
+                        values = c(1,1,1,2,2,2,3,3,3),
+                        guide = guide_legend(nrow=3,ncol=3))+
+  labs(title = "High status", 
+       x = "Rounds", 
+       y = "Number of activated nodes", 
+       color = "Simulation")
+high_status_plot
+ggsave("fig/high_status_saturation.png", high_status_plot, width = 12, height = 6)
+```
+
+```{r}
+high_degree_plot <- data_summed %>% 
+  subset(degree!=F) %>% 
+  subset(round<=35) %>% 
+    ggplot(aes(round, 
+               sumadopt, 
+               color = interaction(str_wrap(name,20), degree, sep=", degree="),
+               linetype = interaction(str_wrap(name,20), degree, sep = ", degree=")))+
+        geom_line(size = 0.7)+
+        theme_minimal()+
+        theme(text = element_text(size = 20, family = "serif"), 
+              legend.key.height = unit(1,"cm"),
+              legend.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_brewer(palette = "Dark2")+
+  scale_color_manual(name="",
+                     values=c(palette[4], palette[5], palette[6], 
+                              palette[4], palette[5], palette[6],
+                              palette[4], palette[5], palette[6]),
+                        guide = guide_legend(nrow=3,ncol=3))+
+  scale_linetype_manual(name="",
+                        values = c(1,1,1,2,2,2,3,3,3),
+                        guide = guide_legend(nrow=3,ncol=3))+
+  labs(title = "High degree", 
+       x = "Rounds", 
+       y = "Number of activated nodes", 
+       color = "Simulation")
+high_degree_plot
+ggsave("fig/high_degree_saturation.png", high_degree_plot, width = 12, height = 6)
+
+```
+
+
+#### Results plot, many ####
+
 
 High status = 0.5
 ```{r}
@@ -95,35 +171,30 @@ ggsave("fig/Degree96_saturation.png", degree_96_plot, width = 12, height = 6)
 
 Getting mean degree under different conditions
 ```{r}
-#Maybe we dont want this??
-means_baseline <- degree_distribution %>% subset(baseline==T) %>% mean_degree()
-
 #This is just all simulation where high degree = FALSE, so they should all have similar degree
 means_standard <- degree_distribution %>% subset(degree==F) %>% mean_degree()
 
-#The different high degree conditions - what makes sense here? In a way we need all nine combinations. Maybe just the one above actually
-means_high_degree_24 <- degree_distribution %>% subset(degree=="24") %>% mean_degree()
-means_high_degree_48 <- degree_distribution %>% subset(degree=="48") %>% mean_degree()
-means_high_degree_96 <- degree_distribution %>% subset(degree=="96") %>% mean_degree()
+#The different high degree conditions
+means_24 <- degree_distribution %>% subset(degree=="24") %>% mean_degree()
+means_48 <- degree_distribution %>% subset(degree=="48") %>% mean_degree()
+means_96 <- degree_distribution %>% subset(degree=="96") %>% mean_degree()
+
 ```
 
-plotting baseline
-```{r}
-degree_baseline_plot <- plot_degree_distribution(means_baseline, title ="Baseline simulations")
-degree_baseline_plot
-ggsave("degree_distribution_baseline.png", degree_baseline_plot, width = 12, height = 6)
-```
 
 plotting standard, i.e., high degree = FALSE
 ```{r}
 degree_standard_plot <- plot_degree_distribution(means_standard, title = "Standard degree distribution")
 degree_standard_plot
-ggsave("degree_distribution_standard.png", degree_standard_plot, width = 12, height = 6)
+ggsave("fig/degree_distribution_standard.png", degree_standard_plot, width = 12, height = 6)
 ```
 
 plotting high degree = TRUE
 ```{r}
-
+degree_24_plot <- plot_degree_distribution(means_24, title = "Degree distribution for high degree = 24")
+degree_24_plot
+degree_96_plot <- plot_degree_distribution(means_96, title = "Degree distribution for high degree = 96")
+degree_96_plot
 ```
 
 
@@ -137,25 +208,4 @@ plotting high degree = TRUE
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Point estimates
-
-### See point estimates
-```{r}
-View(point_estimates)
-```
 

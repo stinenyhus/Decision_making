@@ -30,36 +30,9 @@ calculate_point_estimates <- function(data, name, saturations){
     q = filter(data, adopters >= 22500*point)%>% group_by(network) %>% summarise(minround = min(round))
     q_mean = round(mean(q$minround),0)
     q_sd   = round(sd(q$minround),2)
-    name_mean <- paste("mean", point)
-    name_sd <- paste("sd", point)
-    assign(all$name_mean, q_mean)
-    assign(all$name_sd, q_sd)
+    all[[paste0("mean", point, sep="_")]] <- q_mean
+    all[[paste0("sd", point, sep="_")]] <- q_sd
   }
-  # 
-  # q25=filter(data, adopters >= 22500*0.25) %>% group_by(network) %>% summarise(minround = min(round))
-  # q25_mean = round(mean(q25$minround),0)
-  # q25_sd   = round(sd(q25$minround),2)
-  # q50=filter(data, adopters >= 22500*0.50) %>% group_by(network) %>% summarise(minround = min(round))
-  # q50_mean = round(mean(q50$minround),0)
-  # q50_sd   = round(sd(q50$minround),2)
-  # q75=filter(data, adopters >= 22500*0.75) %>% group_by(network) %>% summarise(minround = min(round))
-  # q75_mean = round(mean(q75$minround),0)
-  # q75_sd   = round(sd(q75$minround),2)
-  # q99=filter(data, adopters >= 22500*0.99) %>% group_by(network) %>% summarise(minround = min(round))
-  # q99_mean = round(mean(q99$minround),0)
-  # q99_sd   = round(sd(q99$minround),2)
-  # # Put into dataframe
-  # all <- data.frame(
-  #   name = name,
-  #   mean_25 = q25_mean,
-  #   sd_25   = q25_sd,
-  #   mean_50 = q50_mean,
-  #   sd_50   = q50_sd,
-  #   mean_75 = q75_mean,
-  #   sd_75   = q75_sd,
-  #   mean_99 = q99_mean,
-  #   sd_99   = q99_sd
-  # )
   return(all)
 }
 
@@ -76,7 +49,7 @@ sum_multiple_results <- function(folders, saturations){
     
     # Read files
     results <- read.csv(paste(folder, "/simulation_results.csv", sep=""))
-    degree_distribution <- read.csv(paste(folder, "/degree_distribution.csv", sep=""))
+    degree_distribution <- read.csv(paste(folder, "/degree_distribution.csv", sep=""), fill = T)
     
     # Extra columns degree distribution 
     degree_distribution$baseline <- FALSE
@@ -164,11 +137,16 @@ plot_standard_by_name <- function(summed_dataframe, title = "",
   plot <- ggplot(summed_dataframe, aes(round, sumadopt, color = str_wrap(name,20)))+
     geom_line(size = 1.2)+
     theme_minimal()+
-    theme(text = element_text(size = 20, family = "serif"), legend.key.height = unit(1,"cm"))+
+    theme(text = element_text(size = 20, family = "serif"), 
+          legend.key.height = unit(1,"cm"),
+          legend.position = "bottom",
+          legend.title = element_blank())+
     scale_color_brewer(palette = "Dark2")+
     labs(title = title, x = x_name, y = y_name, color = "Simulation")
   return(plot)
 }
+
+
 
 
 # Plotting degree distribution summarized with function mean_degree
