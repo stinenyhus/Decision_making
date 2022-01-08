@@ -47,10 +47,10 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
                           high_degree = F, # High status nodes with high degree
                           connectedness = 0, # How connected high degree nodes should be
                           
-                          rep = 100, # Number of repetitions - new network is generated every time
+                          rep = 50, # Number of repetitions - new network is generated every time
                           rounds = 50, # n rounds of the simulation 
                           tau = 0.33, # Threshold (mean of gaussian distribution or just threshold for all nodes)
-                          n = 22500, # Number of nodes in the network - preferably a number with a natural square root
+                          n = 3600, # Number of nodes in the network - preferably a number with a natural square root
                           nei = 2, # degree of neighborhood connectedness --> 12 neighbors in von neumann 
                           p = 0.1){ # probability of rewiring
     
@@ -135,15 +135,8 @@ contagion_sim <- function(tau_type = "random_tau", # Takes values "random_tau" o
     #### INITIAL ADOPTER #### 
     adopters <- rep(F, n)
     # Choose n_seeds initial adopters at random
-    if (high_status == TRUE){
-      initial_adopters <- base::sample(high_status_nodes, size = n_seeds) 
-      }
-    else if (high_degree == TRUE){
-      initial_adopters <- base::sample(id_connected_nodes, size = n_seeds)
-    }
-    else {
-      initial_adopters <- base::sample(seq_len(n), size = n_seeds) 
-    }
+    initial_adopters <- base::sample(seq_len(n), size = n_seeds) 
+  
     for (adopter in initial_adopters){
       initial_neighbors <- get.neighborhood(networknetwork, adopter) #get neighbors for each initial adopter
       adopters[c(adopter, initial_neighbors)] <- T # Set neighbors as adopters

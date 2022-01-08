@@ -16,7 +16,7 @@ install.packages("pacman")
 ```{r}
 library(pacman)
 p_load(gdtools, ggplot2, ggthemes, Hmisc, ggpubr, patchwork, stringr, tidyverse)
-# setwd("/work/Exam/decision_making")
+setwd("/work/Exam/decision_making")
 source("functions/post_sim_functions.R")
 ```
 
@@ -27,7 +27,12 @@ folders = list.dirs(file.path("data"))
 folders = folders[2:length(folders)] # Remove the first one that is just "data"
 folders
 ```
-
+```{r}
+names = unique(data_summed$name)
+standard_names <- names[c(2,4)] #Names that match the original simulations
+extra_small_names <- names[c(1,2,3,4,6)] #Names for the post hoc sims in a small network
+extra_large_names <- names[c(5,7)] #Names for the post hoc sims in a large network
+```
 
 Sum data
 ```{r}
@@ -35,6 +40,7 @@ out = sum_multiple_results(folders, saturations = c(0.20,0.50,0.99))
 data_summed = out[[1]]
 degree_distribution = out[[2]]
 point_estimates = out[[3]]
+data_summed$name <- ifelse(data_summed$name == "1 high status nodes", "Baseline", data_summed$name)
 ```
 
 ### Result plots
@@ -42,14 +48,15 @@ Baseline
 ```{r}
 base_plot <- data_summed %>% 
   subset(baseline==T) %>% 
-  subset(round<=35) %>% 
-  plot_standard_by_name(title = "Baseline simulations")
+  plot_standard_by_name(title = "Baseline simulation")+
+  theme(legend.position = "none")
 base_plot
 ggsave("fig/Baseline_saturation.png", base_plot, width = 12, height = 6)
 ```
 
 
 ```{r}
+library(RColorBrewer)
 palette <- brewer.pal(8,"Dark2")
 ```
 
@@ -57,7 +64,7 @@ palette <- brewer.pal(8,"Dark2")
 ```{r}
 high_status_plot <- data_summed %>% 
   subset(status!=F) %>% 
-  subset(round<=35) %>% 
+  subset(name %in% standard_names) %>% 
     ggplot(aes(round, 
                sumadopt, 
                color = interaction(str_wrap(name,20), status, sep=", status="),
@@ -70,13 +77,12 @@ high_status_plot <- data_summed %>%
               legend.position = "bottom")+
         scale_color_brewer(palette = "Dark2")+
   scale_color_manual(name="",
-                     values=c(palette[4], palette[5], palette[6], 
-                              palette[4], palette[5], palette[6],
-                              palette[4], palette[5], palette[6]),
-                     guide = guide_legend(nrow=3,ncol=3))+
+                     values=c(palette[4], palette[4], palette[5], 
+                              palette[5], palette[6], palette[6]),
+                     guide = guide_legend(nrow=2,ncol=4))+
   scale_linetype_manual(name="",
-                        values = c(1,1,1,2,2,2,3,3,3),
-                        guide = guide_legend(nrow=3,ncol=3))+
+                        values = c(1,2,1,2,1,2),
+                        guide = guide_legend(nrow=2,ncol=3))+
   labs(title = "High status", 
        x = "Rounds", 
        y = "Number of activated nodes", 
@@ -85,10 +91,11 @@ high_status_plot
 ggsave("fig/high_status_saturation.png", high_status_plot, width = 12, height = 6)
 ```
 
+
+
 ```{r}
 high_degree_plot <- data_summed %>% 
   subset(degree!=F) %>% 
-  subset(round<=35) %>% 
     ggplot(aes(round, 
                sumadopt, 
                color = interaction(str_wrap(name,20), degree, sep=", degree="),
@@ -101,13 +108,12 @@ high_degree_plot <- data_summed %>%
               legend.position = "bottom")+
         scale_color_brewer(palette = "Dark2")+
   scale_color_manual(name="",
-                     values=c(palette[4], palette[5], palette[6], 
-                              palette[4], palette[5], palette[6],
-                              palette[4], palette[5], palette[6]),
-                        guide = guide_legend(nrow=3,ncol=3))+
+                     values=c(palette[4], palette[4], palette[5], 
+                              palette[5], palette[6]),
+                     guide = guide_legend(nrow=2,ncol=3))+
   scale_linetype_manual(name="",
-                        values = c(1,1,1,2,2,2,3,3,3),
-                        guide = guide_legend(nrow=3,ncol=3))+
+                        values = c(1,2,1,2,1),
+                        guide = guide_legend(nrow=2,ncol=3))+
   labs(title = "High degree", 
        x = "Rounds", 
        y = "Number of activated nodes", 
@@ -116,6 +122,165 @@ high_degree_plot
 ggsave("fig/high_degree_saturation.png", high_degree_plot, width = 12, height = 6)
 
 ```
+
+#### Post hoc plots ####
+
+
+
+Influence
+```{r}
+# IN SMALL NET
+
+post_small_infl_plot <- data_summed %>% 
+  subset(status=="1") %>% 
+  subset(name %in% extra_small_names) %>% 
+    ggplot(aes(round, 
+               sumadopt, 
+               color = str_wrap(name,25)))+
+        geom_line(size = 0.7)+
+        theme_minimal()+
+        theme(text = element_text(size = 20, family = "serif"), 
+              legend.key.height = unit(1,"cm"),
+              legend.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_brewer(palette = "Dark2")+
+  scale_color_manual(name="",
+                     values=c(palette[3], palette[4], palette[5], 
+                              palette[6], palette[7]),
+                     guide = guide_legend(nrow=2,ncol=4))+
+  # scale_linetype_manual(name="",
+  #                       values = c(1,2,1,2,1,2),
+  #                       guide = guide_legend(nrow=2,ncol=3))+
+  labs(title = "High status", 
+       x = "Rounds", 
+       y = "Number of activated nodes", 
+       color = "Simulation")
+post_small_infl_plot
+ggsave("fig/high_status_saturation_post_small.png", post_small_infl_plot, width = 12, height = 6)
+
+# IN LARGE NET
+post_large_infl_plot <- data_summed %>% 
+  subset(status=="1") %>% 
+  subset(name %in% extra_large_names) %>% 
+    ggplot(aes(round, 
+               sumadopt, 
+               color = str_wrap(name,25)))+
+        geom_line(size = 0.7)+
+        theme_minimal()+
+        theme(text = element_text(size = 20, family = "serif"), 
+              legend.key.height = unit(1,"cm"),
+              legend.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_brewer(palette = "Dark2")+
+  scale_color_manual(name="",
+                     values=c(palette[3], palette[4], palette[5], 
+                              palette[6], palette[7]),
+                     guide = guide_legend(nrow=2,ncol=4))+
+  # scale_linetype_manual(name="",
+  #                       values = c(1,2,1,2,1,2),
+  #                       guide = guide_legend(nrow=2,ncol=3))+
+  labs(title = "High status", 
+       x = "Rounds", 
+       y = "Number of activated nodes", 
+       color = "Simulation")
+post_large_infl_plot
+ggsave("fig/high_status_saturation_post_large.png", post_large_infl_plot, width = 12, height = 6)
+```
+
+```{r}
+high_degree_plot <- data_summed %>% 
+  subset(degree=="24") %>% 
+    ggplot(aes(round, 
+               sumadopt, 
+               color = str_wrap(name,25)))+
+        geom_line(size = 0.7)+
+        theme_minimal()+
+        theme(text = element_text(size = 20, family = "serif"), 
+              legend.key.height = unit(1,"cm"),
+              legend.text = element_text(size=15),
+              legend.position = "bottom")+
+        scale_color_brewer(palette = "Dark2")+
+  scale_color_manual(name="",
+                     values=c(palette[3], palette[4], palette[5], 
+                              palette[6]),
+                     guide = guide_legend(nrow=2,ncol=2))+
+  # scale_linetype_manual(name="",
+  #                       values = c(1,2,1,2,1),
+  #                       guide = guide_legend(nrow=2,ncol=3))+
+  labs(title = "High degree", 
+       x = "Rounds", 
+       y = "Number of activated nodes", 
+       color = "Simulation")
+high_degree_plot
+ggsave("fig/high_degree_saturation_post.png", high_degree_plot, width = 12, height = 6)
+```
+
+
+
+
+
+
+### Degree distribution plots
+
+Re-extracting degree distributions because names are wrong
+```{r}
+standard_degrees <- c()
+i=1
+for (folder in folders[1:length(folders)-1]){
+  # print(strsplit(folder, "_|/")[[1]][3])
+  if (strsplit(folder, "_|/")[[1]][3] %in% c("18", 36)){
+    standard_degrees[[i]] <- folder
+    i = i+1
+  }
+}
+
+standard_degrees
+standard_out = sum_multiple_results(standard_degrees, saturations = c(0.20,0.50,0.99))
+degree_distribution_standard = standard_out[[2]]
+```
+
+Getting mean degree under different conditions
+```{r}
+#This is just all simulation where high degree = FALSE, so they should all have similar degree
+means_standard <- degree_distribution_standard %>% subset(degree==F) %>% mean_degree()
+
+#The different high degree conditions
+means_24 <- degree_distribution %>% subset(degree=="24") %>% mean_degree()
+means_48 <- degree_distribution %>% subset(degree=="48") %>% mean_degree()
+means_96 <- degree_distribution %>% subset(degree=="96") %>% mean_degree()
+```
+
+
+plotting standard, i.e., high degree = FALSE
+```{r}
+degree_standard_plot <- plot_degree_distribution(means_standard, title = "Standard degree distribution")
+degree_standard_plot
+ggsave("fig/degree_distribution_standard.png", degree_standard_plot, width = 12, height = 6)
+```
+
+plotting high degree = TRUE
+```{r}
+degree_24_plot <- plot_degree_distribution(means_24, title = "Degree distribution for high degree = 24")
+degree_24_plot
+ggsave("fig/degree_distribution_24.png", degree_24_plot, width = 12, height = 6)
+degree_48_plot <- plot_degree_distribution(means_48, title = "Degree distribution for high degree = 48")
+degree_48_plot
+ggsave("fig/degree_distribution_48.png", degree_48_plot, width = 12, height = 6)
+
+
+degree_96_plot <- plot_degree_distribution(means_96, title = "Degree distribution for high degree = 96")
+degree_96_plot
+```
+
+Post hoc: only condition n = 36, d = 96
+```{r}
+nh36_d_96 = read.csv("data/nHigh_36_highDegree_TRUE_NConnectionsHigh_96/degree_distribution.csv")
+means_nh36_d_96 <- nh36_d_96%>% mean_degree()
+nh36_d_96_plot <- means_nh36_d_96 %>% subset(n_neighbors <= 25) %>% plot_degree_distribution(title="36 high status nodes with 96 connections")
+ggsave("fig/degree_36_high_96.png", nh36_d_96_plot, width = 12, height = 6)
+```
+
+
 
 
 #### Results plot, many ####
@@ -162,39 +327,6 @@ High degree = 96 connections
 degree_96_plot <- data_summed %>% subset(degree == "96") %>% 
   plot_standard_by_name(title = "High degree = 96 connections")
 ggsave("fig/Degree96_saturation.png", degree_96_plot, width = 12, height = 6)
-```
-
-
-
-
-### Degree distribution plots
-
-Getting mean degree under different conditions
-```{r}
-#This is just all simulation where high degree = FALSE, so they should all have similar degree
-means_standard <- degree_distribution %>% subset(degree==F) %>% mean_degree()
-
-#The different high degree conditions
-means_24 <- degree_distribution %>% subset(degree=="24") %>% mean_degree()
-means_48 <- degree_distribution %>% subset(degree=="48") %>% mean_degree()
-means_96 <- degree_distribution %>% subset(degree=="96") %>% mean_degree()
-
-```
-
-
-plotting standard, i.e., high degree = FALSE
-```{r}
-degree_standard_plot <- plot_degree_distribution(means_standard, title = "Standard degree distribution")
-degree_standard_plot
-ggsave("fig/degree_distribution_standard.png", degree_standard_plot, width = 12, height = 6)
-```
-
-plotting high degree = TRUE
-```{r}
-degree_24_plot <- plot_degree_distribution(means_24, title = "Degree distribution for high degree = 24")
-degree_24_plot
-degree_96_plot <- plot_degree_distribution(means_96, title = "Degree distribution for high degree = 96")
-degree_96_plot
 ```
 
 

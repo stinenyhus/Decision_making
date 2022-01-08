@@ -45,6 +45,8 @@ soccult_simulations.R
 *.html # Dont push README preview
 fig/* # Dont push all figures 
 *.zip
+data/*
+data2/*
 
 # Figures and data files 
 *.png

@@ -4,12 +4,24 @@
 
 # This function is for summing the data, name is what it will be plot by 
 sum_data <- function(dataframe, name = "", baseline, status, degree){
-  summed_data <- dataframe %>% group_by(round) %>% summarise(sumadopt = mean(adopters),
+  failed <- dataframe %>% filter(is.na(adopters))
+  failed_nets <- unique(failed$network)
+  success_sims <- dataframe %>% subset(!(network %in% failed_nets))
+  summed_data <- success_sims %>% group_by(round) %>% summarise(sumadopt = mean(adopters),
                                                              sd = sd(adopters),
                                                              name = name,
                                                              baseline = baseline, 
                                                              status = status, 
                                                              degree = degree)
+  print(paste("Number of simulations for", 
+              name, 
+              "baseline", 
+              baseline, 
+              "status",
+              status,
+              "degree",
+              degree,
+              "that failed is:", length(failed_nets)))
   return(summed_data)
 }
 
@@ -24,10 +36,13 @@ mean_degree <- function(degree_distributions){
 }
 
 # For getting quantile point estimates of saturations
-calculate_point_estimates <- function(data, name, saturations){
+calculate_point_estimates <- function(dataframe, name, saturations){
   all <- data.frame(name=name)
+  failed <- dataframe %>% filter(is.na(adopters))
+  failed_nets <- unique(failed$network)
+  success_sims <- dataframe %>% subset(!(network %in% failed_nets))
   for (point in saturations){
-    q = filter(data, adopters >= 22500*point)%>% group_by(network) %>% summarise(minround = min(round))
+    q = success_sims %>% subset(adopters >= 3600*point)%>% group_by(network) %>% summarise(minround = min(round))
     q_mean = round(mean(q$minround),0)
     q_sd   = round(sd(q$minround),2)
     all[[paste0("mean", point, sep="_")]] <- q_mean
@@ -55,26 +70,26 @@ sum_multiple_results <- function(folders, saturations){
     degree_distribution$baseline <- FALSE
     degree_distribution$status <- FALSE
     degree_distribution$degree <- FALSE
-    degree_distribution$name <- paste(split[[1]][length(split[[1]])], "seeds")
+    degree_distribution$name <- paste(split[[1]][length(split[[1]])], "high status nodes")
     
     # Baseline files
     if (split[[1]][2] == "NoHigh"){
       # Summarise diffusion 
-      summed_data <- sum_data(results, name = paste(split[[1]][length(split[[1]])], "seeds"), T, F, F)
+      summed_data <- sum_data(results, name = paste(split[[1]][length(split[[1]])], "high status nodes"), T, F, F)
       
       # Summarise degree distribution
       degree_distribution$baseline <- TRUE
       
       # Summarise point estimates
       points <- calculate_point_estimates(results, 
-                                          name = paste("Baseline", split[[1]][length(split[[1]])], "seeds"),
+                                          name = paste("Baseline", split[[1]][length(split[[1]])], "high status nodes"),
                                           saturations = saturations)
       
     } 
     # High status files
     else if (split[[1]][4] == "highStatus"){
       # Summarise diffusion 
-      summed_data <- sum_data(results, name = paste(split[[1]][3], "seeds"), 
+      summed_data <- sum_data(results, name = paste(split[[1]][3], "high status nodes"), 
                               F, split[[1]][length(split[[1]])], F)
       
       # Summarise degree distribution
@@ -85,14 +100,14 @@ sum_multiple_results <- function(folders, saturations){
                                                                 split[[1]][length(split[[1]])], 
                                                                 "with",
                                                                 split[[1]][3], 
-                                                                "seeds"),
+                                                                "high status nodes"),
                                           saturations = saturations)
     } 
     
     # High degree files 
     else if (split[[1]][4] == "highDegree"){
       # Summarise diffusion 
-      summed_data <- sum_data(results, name = paste(split[[1]][3], "seeds"), 
+      summed_data <- sum_data(results, name = paste(split[[1]][3], "high status nodes"), 
                               F, F, split[[1]][length(split[[1]])])
       
       # Summarise degree distribution
@@ -103,7 +118,7 @@ sum_multiple_results <- function(folders, saturations){
                                                                 split[[1]][length(split[[1]])],
                                                                 "with",
                                                                 split[[1]][3],
-                                                                "seeds"),
+                                                                "high status nodes"),
                                           saturations = saturations)
     } 
     # Combine this file with previous
