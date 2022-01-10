@@ -23,15 +23,19 @@ It is structured as follows
 To run the simulations, run function contagion_sim with desired variables. 
 The variables of the function contagion_sim that are held constant throughout all simulations in this study are 
 - tau_type = "random_tau" (nodes are randomly assigned a threshold drawn from a normal distribution)
-- rep = 100 (all conditions are run in 100 iterations that are then averaged)
+- rep = 50 (all conditions are run in 50 iterations that are then averaged)
 - rounds = 50 (all simulations run for 50 rounds no matter how slowly/quickly the iteration runs)
 - tau = 0.33 (since tau_type = "random_tau", this value refers to the mean of normal distribution. Standard deviation is hardcoded = 0.16)
-- n = 22500 (network size is 22500 nodes for all simulations. This created 150 x 150 two-dimentional CA network)
+- n = 3600 (network size is 3600 nodes for all simulations. This created 60 x 60 two-dimentional CA network)
 - nei = 2 (most nodes will initially have 12 neighbors)
 - p = 0.1 (rewiring probability is 10% for all simulations)
+- n_seeds = 1 (the contagion is seeded with one node and its neighborhood)
 
 ### High degree 
-High influence nodes with high degree are implemented by setting high_degree = T in contagion_sim and also providing a non-zero values for n_high (indicating number of high degree nodes in the network) and connectedness (indicating how many connections high degree nodes should have). NB: n_seeds = 1 by default, so if seeded nodes should be high degree, set n_seeds = n_high.
+High influence nodes with high degree are implemented by setting high_degree = T in contagion_sim and also providing a non-zero values for n_high (indicating number of high degree nodes in the network) and connectedness (indicating how many connections high degree nodes should have). 
 
 ### High status
-High influence nodes with high status are implemented by setting high_status = T in contagion_sim and also providing a non-zero values for n_high (indicating number of high status nodes in the network) and high_tau_perc (indicating how much influence out of mean tau high status should have. high_tau_perc = 1 means that high status nodes have 100% of mean tau as influence). NB: n_seeds = 1 by default, so if seeded nodes should be high status, set n_seeds = n_high.
+High influence nodes with high status are implemented by setting high_status = T in contagion_sim and also providing a non-zero values for n_high (indicating number of high status nodes in the network) and high_tau_perc (indicating how much influence out of mean tau high status should have. high_tau_perc = 1 means that high status nodes have 100% of mean tau as influence). 
+
+### Post hoc
+Additionally to the main simulations, post hoc simulations are run. These hold influence and degree constant at 100% of tau and 24 connections, respectively, and increase number of high status nodes to 2, 4 and 8 %. 
