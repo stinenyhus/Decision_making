@@ -117,13 +117,13 @@ print("Finished High degree nodes - degree = 96")
 
 ### POST HOC ###
 ```{r}
-# contagion_sim(n_high = 72,
-#               high_status = TRUE,
-#               high_tau_perc = 1)
-# 
-# contagion_sim(n_high = 144,
-#               high_status = TRUE,
-#               high_tau_perc = 1)
+contagion_sim(n_high = 72,
+              high_status = TRUE,
+              high_tau_perc = 1)
+
+contagion_sim(n_high = 144,
+              high_status = TRUE,
+              high_tau_perc = 1)
 
 contagion_sim(n_high = 288,
               high_status = TRUE,
@@ -146,6 +146,10 @@ contagion_sim(n_high = 72,
               connectedness = 24)
 
 contagion_sim(n_high = 144,
+              high_degree = TRUE,
+              connectedness = 24)
+
+contagion_sim(n_high = 288,
               high_degree = TRUE,
               connectedness = 24)
 

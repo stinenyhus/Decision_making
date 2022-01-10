@@ -44,7 +44,7 @@ data_summed$name <- ifelse(data_summed$name == "1 high status nodes", "Baseline"
 ```
 
 ### Result plots
-Baseline
+Baseline - not included after all
 ```{r}
 base_plot <- data_summed %>% 
   subset(baseline==T) %>% 
@@ -60,7 +60,7 @@ library(RColorBrewer)
 palette <- brewer.pal(8,"Dark2")
 ```
 
-
+High influence - main analysis
 ```{r}
 high_status_plot <- data_summed %>% 
   subset(status!=F) %>% 
@@ -92,7 +92,7 @@ ggsave("fig/high_status_saturation.png", high_status_plot, width = 12, height = 
 ```
 
 
-
+High degree - main analysis
 ```{r}
 high_degree_plot <- data_summed %>% 
   subset(degree!=F) %>% 
@@ -125,8 +125,6 @@ ggsave("fig/high_degree_saturation.png", high_degree_plot, width = 12, height = 
 
 #### Post hoc plots ####
 
-
-
 Influence
 ```{r}
 # IN SMALL NET
@@ -148,9 +146,6 @@ post_small_infl_plot <- data_summed %>%
                      values=c(palette[3], palette[4], palette[5], 
                               palette[6], palette[7]),
                      guide = guide_legend(nrow=2,ncol=4))+
-  # scale_linetype_manual(name="",
-  #                       values = c(1,2,1,2,1,2),
-  #                       guide = guide_legend(nrow=2,ncol=3))+
   labs(title = "High status", 
        x = "Rounds", 
        y = "Number of activated nodes", 
@@ -176,9 +171,6 @@ post_large_infl_plot <- data_summed %>%
                      values=c(palette[3], palette[4], palette[5], 
                               palette[6], palette[7]),
                      guide = guide_legend(nrow=2,ncol=4))+
-  # scale_linetype_manual(name="",
-  #                       values = c(1,2,1,2,1,2),
-  #                       guide = guide_legend(nrow=2,ncol=3))+
   labs(title = "High status", 
        x = "Rounds", 
        y = "Number of activated nodes", 
@@ -204,9 +196,6 @@ high_degree_plot <- data_summed %>%
                      values=c(palette[3], palette[4], palette[5], 
                               palette[6]),
                      guide = guide_legend(nrow=2,ncol=2))+
-  # scale_linetype_manual(name="",
-  #                       values = c(1,2,1,2,1),
-  #                       guide = guide_legend(nrow=2,ncol=3))+
   labs(title = "High degree", 
        x = "Rounds", 
        y = "Number of activated nodes", 
